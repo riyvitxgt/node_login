@@ -4,13 +4,30 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
+var passport = require('passport');
+var config = require('./config/config');
+var User = require('./models/user');
+var LocalStrategy = require('passport-local').Strategy;
+
 
 var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 var RedisStore = require('connect-redis')(session);
 
 var routes = require('./routes/index');
 
 var app = express();
+
+mongoose.connect('mongodb://localhost/test');
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.config = config;
+
+//database
+//var database = require('./config/database')(app, mongoose);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -22,15 +39,21 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({
-  store: new RedisStore({}),
+/*app.use(session({
+  store: new MongoStore({
+    url: 'mongodb://127.0.0.1/test'
+  }),
   secret: 'keyboard cat'
-}));
+}));*/
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 
 app.use('/', routes);
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

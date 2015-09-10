@@ -15,6 +15,9 @@
     "serve-favicon": "~2.3.0",
     "mongoose": "*",
     "express-session": "*",
-    "connect-redis": "*"
+    "connect-redis": "*",
+    "passport": "*",
+    "passport-local": "*",
+    "passport-local-mongoose": "*"
   }
 }
